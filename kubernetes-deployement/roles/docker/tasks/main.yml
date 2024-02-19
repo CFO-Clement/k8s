@@ -1,0 +1,18 @@
+- name: Install necessary packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - docker.io
+
+- name: Ensure Docker is started and enabled at boot
+  systemd:
+    name: docker
+    enabled: yes
+    state: started

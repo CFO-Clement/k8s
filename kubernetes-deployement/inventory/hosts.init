@@ -1,2 +1,3 @@
 [all]
-debian-vm ansible_host=your_vm_ip ansible_user=your_vm_user
+debian-vm ansible_host=localhost ansible_user=usr ansible_password=Azerty1+
+```
