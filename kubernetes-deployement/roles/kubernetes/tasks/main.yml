@@ -1,0 +1,50 @@
+- name: Add Kubernetes signing key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add Kubernetes repository
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+
+- name: Install Kubernetes packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - kubelet
+      - kubeadm
+      - kubectl
+
+- name: Disable Swap
+  shell: swapoff -a
+  ignore_errors: true
+
+- name: Remove swap from /etc/fstab
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^\s*[^#]\s*\w+\s+swap\s+\w+\s+\w+\s+0\s+0'
+    line: "# Commented out by Ansible due to Kubernetes setup"
+    state: absent
+
+- name: Initialize the Kubernetes cluster
+  shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+  args:
+    creates: /etc/kubernetes/admin.conf
+
+- name: Setup kubeconfig for local user
+  shell: |
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+  args:
+    executable: /bin/bash
+  become_user: your_local_user
+
+- name: Install Flannel networking
+  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"

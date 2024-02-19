@@ -1,0 +1,2 @@
+[all]
+debian-vm ansible_host=your_vm_ip ansible_user=your_vm_user
