@@ -21,12 +21,12 @@ kubernetes-deployment/
             └── main.yml
 ```
 
-##Playbooks
+## Playbooks
 - `setup-docker.yml` : Installe Docker sur la VM.
 - `setup-kubernetes.yml` : Installe kubeadm, kubelet, kubectl et initialise le cluster.
 - `deploy-application.yml` : Déploie votre application Django sur le cluster.
 
-##Roles
-Le rôle `docker/tasks/main.yml` installe Docker.
-Le rôle `kubernetes/tasks/main.yml` installe kubeadm, kubelet, kubectl et initialise le cluster.
-Le rôle `application/tasks/main.yml` contiendrait les tâches pour conteneuriser votre application Django et la déployer (construction de l'image Docker, push vers un registre, création des ressources Kubernetes nécessaires, etc.). Cette partie serait spécifique à votre application.
+## Roles
+- Le rôle `docker/tasks/main.yml` installe Docker.
+- Le rôle `kubernetes/tasks/main.yml` installe kubeadm, kubelet, kubectl et initialise le cluster.
+- Le rôle `application/tasks/main.yml` contiendrait les tâches pour conteneuriser votre application Django et la déployer (construction de l'image Docker, push vers un registre, création des ressources Kubernetes nécessaires, etc.). Cette partie serait spécifique à votre application.
