@@ -48,3 +48,36 @@
   shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
   environment:
     KUBECONFIG: "/etc/kubernetes/admin.conf"
+
+- name: Enable Metrics Server in Minikube
+  command: minikube addons enable metrics-server
+  become: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Deploy Prometheus
+  shell: |
+    kubectl create namespace monitoring || true
+    kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/bundle.yaml -n monitoring
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: Deploy Grafana
+  shell: |
+    kubectl apply -f https://raw.githubusercontent.com/grafana/helm-charts/main/charts/grafana/templates/deployment.yaml -n monitoring
+    kubectl expose deployment grafana --type=NodePort --port=3000 -n monitoring
+  args:
+    executable: /bin/bash
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: Get Grafana NodePort
+  shell: kubectl get service grafana -n monitoring -o=jsonpath='{.spec.ports[?(@.port==3000)].nodePort}'
+  register: grafana_port
+  environment:
+    KUBECONFIG: "/home/{{ ansible_user }}/.kube/config"
+
+- name: Echo Grafana Access Info
+  debug:
+    msg: "Access Grafana on http://{{ ansible_host }}:{{ grafana_port.stdout }}"

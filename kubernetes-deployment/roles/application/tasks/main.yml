@@ -1,0 +1,22 @@
+- hosts: localhost
+  tasks:
+    - name: Clone repository
+      git:
+        repo: 'https://your-repository-url.git'
+        dest: '/some/local/directory'
+        clone: yes
+        update: yes
+
+    - name: Install Kompose
+      get_url:
+        url: https://github.com/kubernetes/kompose/releases/download/v1.26.0/kompose-linux-amd64
+        dest: /usr/local/bin/kompose
+        mode: '0755'
+
+    - name: Convert docker-compose.yml to Kubernetes configs
+      shell: kompose convert -f /some/local/directory/docker-compose.yml -o /some/local/directory/k8s
+      args:
+        chdir: /some/local/directory
+
+    - name: Apply Kubernetes configs
+      shell: kubectl apply -f /some/local/directory/k8s
