@@ -34,6 +34,6 @@ kubernetes-deployment/
 - Le rôle `application/tasks/main.yml` contiendrait les tâches pour conteneuriser votre application Django et la déployer (construction de l'image Docker, push vers un registre, création des ressources Kubernetes nécessaires, etc.). Cette partie serait spécifique à votre application.
 
 # Utilisation
-- `ansible-playbook -i inventory/hosts.ini playbooks/setup-docker.yml`
+- `ansible-playbook -i inventory/hosts.ini playbooks/setup-docker.yml` 
 - `ansible-playbook -i inventory/hosts.ini playbooks/setup-kubernetes.yml`
 - `ansible-playbook -i inventory/hosts.ini playbooks/deploy-application.yml`
