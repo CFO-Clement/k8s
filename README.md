@@ -37,3 +37,6 @@ kubernetes-deployment/
 - `ansible-playbook -i inventory/hosts.ini playbooks/setup-docker.yml` 
 - `ansible-playbook -i inventory/hosts.ini playbooks/setup-kubernetes.yml`
 - `ansible-playbook -i inventory/hosts.ini playbooks/deploy-application.yml`
+
+# Notes
+- https://maxat-akbanov.com/prometheus-and-grafana-setup-in-minikube

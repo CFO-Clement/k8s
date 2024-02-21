@@ -56,12 +56,27 @@
   become_user: usr
 
 - name: Expose Prometheus
-  command: kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-np
+  command: kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-np --namespace=monitoring
   become: yes
   become_user: usr
 
+- name: Get Prometheus url
+  command: minikube service prometheus-server-np --url
+  register: prometheus_url
+  become: yes
+  become_user: usr
+
+- name: Print Prometheus url
+  debug:
+    msg: "l'url de Prometheus est : {{ prometheus_url }}"
+
 - name: Ajouter le repo Helm pour Grafana
   command: helm repo add grafana https://grafana.github.io/helm-charts
+
+- name: Mettre à jour les dépôts Helm
+  command: helm repo update
+  become: yes
+  become_user: usr
 
 - name: Déployer Grafana
   command: helm install grafana grafana/grafana --namespace monitoring
@@ -69,6 +84,26 @@
   become_user: usr
 
 - name: Expose Grafana
-  command: kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana-np
+  command: kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana-np --namespace=monitoring
   become: yes
   become_user: usr
+
+- name: Get Grafana Credential
+  command: kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+  register: grafana_credential
+  become: yes
+  become_user: usr
+
+- name: Print Grafana Credential
+  debug:
+    msg: "Les credential de Grafana Credential sont: {{ grafana_credential }}"
+
+- name: Get Grafana URL
+  command: minikube service grafana-np --url
+  register: grafana_url
+  become: yes
+  become_user: usr
+
+- name: Print Grafana Credential
+  debug:
+    msg: "l'url de grafana est: {{ grafana_url }}"
