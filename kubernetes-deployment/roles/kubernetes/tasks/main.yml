@@ -1,12 +1,10 @@
-
-- name: Installer les dépendances nécessaires
+- name: Installer les dépendances pour Minikube
   apt:
     name:
-      - curl
-      - docker.io
       - conntrack
-    state: present
-    update_cache: yes
+      - docker.io
+      - curl
+    state: latest
 
 - name: Télécharger Minikube
   get_url:
@@ -20,29 +18,57 @@
     dest: /usr/local/bin/kubectl
     mode: '0755'
 
-- name: Config docker group
-  command: sudo usermod -aG docker $USER && newgrp docker
+- name: Installer Helm
+  get_url:
+    url: https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz
+    dest: /tmp/helm.tar.gz
+
+- name: Décompresser Helm
+  unarchive:
+    src: /tmp/helm.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Déplacer les binaires de Helm
+  command: mv /tmp/linux-amd64/helm /usr/local/bin/helm
 
 - name: Démarrer Minikube
   command: minikube start --driver=docker
+  become: yes
+  become_user: usr
 
-- name: Activer Metrics Server dans Minikube
-  command: minikube addons enable metrics-server
+- name: Créer un namespace monitoring
+  command: kubectl create namespace monitoring
+  become: yes
+  become_user: usr
+
+- name: Ajouter le repo Helm pour Prometheus
+  command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+- name: Mettre à jour les dépôts Helm
+  command: helm repo update
+  become: yes
+  become_user: usr
 
 - name: Déployer Prometheus
-  shell: |
-    kubectl create namespace monitoring || true
-    kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/master/bundle.yaml -n monitoring --namespace=default
+  command: helm install prometheus prometheus-community/prometheus --namespace monitoring
+  become: yes
+  become_user: usr
+
+- name: Expose Prometheus
+  command: kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-np
+  become: yes
+  become_user: usr
+
+- name: Ajouter le repo Helm pour Grafana
+  command: helm repo add grafana https://grafana.github.io/helm-charts
 
 - name: Déployer Grafana
-  shell: |
-    kubectl apply -f https://raw.githubusercontent.com/grafana/helm-charts/main/charts/grafana/templates/deployment.yaml -n monitoring
-    kubectl expose deployment grafana --type=NodePort --port=3000 -n monitoring
+  command: helm install grafana grafana/grafana --namespace monitoring
+  become: yes
+  become_user: usr
 
-- name: Obtenir le NodePort de Grafana
-  shell: kubectl get service grafana -n monitoring -o=jsonpath='{.spec.ports[?(@.port==3000)].nodePort}'
-  register: grafana_port
-
-- name: Afficher les informations d'accès à Grafana
-  debug:
-    msg: "Accédez à Grafana via http://{{ ansible_host }}:{{ grafana_port.stdout }}"
+- name: Expose Grafana
+  command: kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana-np
+  become: yes
+  become_user: usr
