@@ -21,7 +21,7 @@
     mode: '0755'
 
 - name: Config docker group
-  command: echo "sudo usermod -aG docker $USER && newgrp docker"
+  command: sudo usermod -aG docker $USER && newgrp docker
 
 - name: Démarrer Minikube
   command: minikube start --driver=docker
