@@ -26,15 +26,24 @@
   become: yes
   become_user: usr
 
+- name: Wait Prometheus to run
+  command: sleep 30
+
+- name: Update services list
+  command: minikube service list
+  become: yes
+  become_user: usr
+
 - name: Get Prometheus url
-  command: minikube service prometheus-server-np --url
+  command: minikube service prometheus-server-np --url -n monitoring
   register: prometheus_url
+  ignore_errors: yes
   become: yes
   become_user: usr
 
 - name: Print Prometheus url
   debug:
-    msg: "l'url de Prometheus est : {{ prometheus_url }}"
+    msg: "l'url de Prometheus est : {{ prometheus_url.stdout }}"
 
 - name: Ajouter le repo Helm pour Grafana
   command: helm repo add grafana https://grafana.github.io/helm-charts
@@ -55,21 +64,24 @@
   become_user: usr
 
 - name: Get Grafana Credential
-  command: kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-  register: grafana_credential
+  shell: kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode
+  register: grafana_password
+  args:
+    executable: /bin/bash
   become: yes
   become_user: usr
 
-- name: Print Grafana Credential
+- name: Print Grafana admin password
   debug:
-    msg: "Les credential de Grafana Credential sont: {{ grafana_credential }}"
+    msg: "Grafana admin password is: {{ grafana_password.stdout }}"
 
 - name: Get Grafana URL
-  command: minikube service grafana-np --url
+  command: minikube service grafana-np --url -n monitoring
   register: grafana_url
+  ignore_errors: yes
   become: yes
   become_user: usr
 
 - name: Print Grafana Credential
   debug:
-    msg: "l'url de grafana est: {{ grafana_url }}"
+    msg: "l'url de grafana est: {{ grafana_url.stdout }}"
