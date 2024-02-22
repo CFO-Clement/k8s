@@ -43,3 +43,10 @@
 
 - name: Déplacer les binaires de Helm
   command: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+
+- name: Install Kompose
+  get_url:
+    url: https://github.com/kubernetes/kompose/releases/download/v1.26.0/kompose-linux-amd64
+    dest: /usr/local/bin/kompose
+    mode: '0755'
+

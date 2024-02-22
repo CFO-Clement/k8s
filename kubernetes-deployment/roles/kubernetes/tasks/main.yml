@@ -41,10 +41,6 @@
   become: yes
   become_user: usr
 
-- name: Print Prometheus url
-  debug:
-    msg: "l'url de Prometheus est : {{ prometheus_url.stdout }}"
-
 - name: Ajouter le repo Helm pour Grafana
   command: helm repo add grafana https://grafana.github.io/helm-charts
 
@@ -71,10 +67,6 @@
   become: yes
   become_user: usr
 
-- name: Print Grafana admin password
-  debug:
-    msg: "Grafana admin password is: {{ grafana_password.stdout }}"
-
 - name: Get Grafana URL
   command: minikube service grafana-np --url -n monitoring
   register: grafana_url
@@ -82,6 +74,20 @@
   become: yes
   become_user: usr
 
+- name: Créer un namespace application
+  command: kubectl create namespace application
+  become: yes
+  become_user: usr
+
+- name: Print Grafana admin password
+  debug:
+    msg: "Grafana admin password is: {{ grafana_password.stdout }}"
+
 - name: Print Grafana Credential
   debug:
     msg: "l'url de grafana est: {{ grafana_url.stdout }}"
+
+- name: Print Prometheus Credential
+  debug:
+    msg: "l'url de prometheus est: {{ prometheus_url.stdout }}"
+

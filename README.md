@@ -40,3 +40,10 @@ kubernetes-deployment/
 
 # Notes
 - https://maxat-akbanov.com/prometheus-and-grafana-setup-in-minikube
+
+## Playbook: setup-docker
+Ce playbook gere l'installation de toutes les dependance et install les binaire necessaire
+
+## Playbook: setup-kubernetes
+Ce playbook vas configuere k8s. Il ce base sur MiniKube
+il vas cree un namespace monitoring 
