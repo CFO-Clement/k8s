@@ -26,7 +26,6 @@
   shell: kubectl apply -f /home/usr/project/k8s -n application
   become: yes
   become_user: usr
-
 - name: Expose Application
   command: kubectl expose service angular-app --type=NodePort --target-port=80 --name=angular-app-np -n application
   become: yes
